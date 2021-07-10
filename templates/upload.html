@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+
+    <title>Telecharger votre fichier ici</title>
+    <link href="{% static '/dashboard/css/styleupload.css' %}" rel="stylesheet">
+
+
+</head>
+
+<body translate="no">
+<div id="header">
+    <ul>
+        <li><a href="{% url 'accueil' %}">ACCUEIL</a></li>
+        <li><a href="{% url 'upload' %}">TELECHARGER FICHIER</a></li>
+        <li><a href="{% url 'analyse_general' %}">ANALYSE GLOBALE</a></li>
+        <li><a href="">CONTACT</a></li>
+    </ul>
+</div>
+
+<form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>{{ form.non_field_errors }}</p>
+    <h1>Reinsegner les <strong>informations supplementaire</strong></h1>
+
+    <div class="form-group">
+        {{ form.nomdataset.errors }}
+        <label for="{{ form.nomdataset.id_for_label }}">Nom du dataset<span>Utilisez le titre pour avoir un resultat mieux structure</span></label>
+        {{ form.nomdataset }}
+    </div>
+    <div class="form-group">
+        {{ form.category.errors }}
+        <label for="{{ form.category.id_for_label }}">Categorie<span>Selectionnez une categorie dans la liste deroulante</span></label>
+        <!--<input type="text" list="captionlist" name="caption" id="caption" class="form-controll" required>
+        -->
+        {{ form.category }}
+    </div>
+
+    <div class="form-group">
+        {{ form.pays.errors }}
+        <label for="{{ form.pays.id_for_label }}">Pays<span>Selectionnez le pays dans la liste deroulante</span></label>
+        <!--<input type="text" list="captionlist" name="caption" id="caption" class="form-controll" required>
+        -->
+        {{ form.pays }}
+    </div>
+
+    <div class="form-group">
+        {{ form.annee.errors }}
+        <label for="{{ form.annee.id_for_label }}">Année<span>Selectionnez l'année de la dernière modification</span></label>
+        <!--<input type="text" list="captionlist" name="caption" id="caption" class="form-controll" required>
+        -->
+        {{ form.annee }}
+    </div>
+
+    <div class="form-group">
+        {{ form.sep.errors }}
+        <label for="{{ form.sep.id_for_label }}">Séparateur est ';' ?
+            <span>Choisir le séparateur qui défini vos colonnes</span></label>
+        <div class="separateur">
+            {{ form.sep }}
+        </div>
+    </div>
+
+    <div class="form-group file-area">
+        {{ form.csv.errors }}
+        <label for="{{ form.csv.id_for_label }}">Fichier<span>Le type du document doit etre csv</span></label>
+        {{ form.csv }}
+        <div class="file-dummy">
+            <div class="success">Vos fichiers ont été prises en compte</div>
+            <div class="default">Selectionnez un fichier</div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <button type="submit">Analyser!</button>
+    </div>
+
+
+    <p><input type="submit" value="Upload"/></p>
+</form>
+{#  <form action method="post">#}
+{#  #}
+{#  #}
+{#</form>#}
+
+
+<link href='https://fonts.googleapis.com/css?family=Lato:100,200,300,400,500,600,700' rel='stylesheet' type='text/css'>
+
+<a href="accueil.html" class="back-to-article">Accueil</a>
+
+
+</body>
+
+</html>
+ 

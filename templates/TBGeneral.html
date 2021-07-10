@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    {% load static %}
+    <title>Tableau de bord général</title>
+    <link type="text/css" rel="stylesheet" href="{% static 'dashboard/css/styleTB.css' %}">
+
+    <script type="text/javascript" src="{% static 'dashboard/js/jquery-2.1.1.js' %}"></script>
+    <link href="{% static 'dashboard/css/github_contribution_graph.css' %}" media="all" rel="stylesheet">
+
+    <script type="text/javascript">
+
+
+        function getJsonStr(datasets_jsonstr) {
+
+            var jsonArray = JSON.parse(datasets_jsonstr)
+            var return_list = jsonArray
+            return return_list;
+        }
+
+        $(document).ready(function () {
+
+            var datasets_jsonStr = JSON.parse('{{ dataSetJson|escapejs }}');
+
+
+            $('#github_chart_3').github_graph({
+                start: null,
+                //Generate random entries from 10-> 100 entries
+                data: datasets_jsonStr,
+                //override colours
+                colors: ['#eeeeee', '#d6e685', '#8cc665', '#44a340', '#44a340']
+            });
+
+        });
+
+        if (!String.prototype.formatString) {
+            String.prototype.formatString = function () {
+                var args = arguments;
+                return this.replace(/{(\d+)}/g, function (match, number) {
+                    return typeof args[number] != 'undefined'
+                        ? args[number]
+                        : match
+                        ;
+                });
+            };
+        }
+
+        (function ($) {
+
+
+            $.fn.github_graph = function (options) {
+
+                // Get the total number of files
+                var getTotalNum = function (data_t) {
+                    var num = data_t.id.length
+                    return num
+                }
+
+                // Get the color of each file
+                var getColor = function (countErr) {
+                    if (countErr >= 150) {
+                        return settings.colors[settings.colors.length - 5];
+                    }
+                    if (countErr >= 100) {
+                        return settings.colors[settings.colors.length - 4];
+                    }
+                    if (countErr >= 80) {
+                        return settings.colors[settings.colors.length - 3];
+                    }
+                    if (countErr >= 30) {
+                        return settings.colors[settings.colors.length - 2];
+                    } else {
+                        return settings.colors[settings.colors.length - 1]
+                    }
+                }
+
+                var start =
+                    function () {
+                        var countNum = getTotalNum(settings.data);
+                        var color = getColor(settings.data.id[0].Err);
+                        // $('body').append('<div>' + '<h1>Total Number :' + countNum + '</h1> </div>');
+                        settings.colors_length = settings.colors.length;
+
+                        var wrap_chart = _this;
+
+
+                        var step = 13;
+                        var loop_html = "";
+                        var numc = 0;
+
+                        {% for foo in urlOfFile %}
+                            for (var i = 0; i < countNum / 5; i++) {
+                            var g_x = i * step;
+                            var item_html = '<g transform="translate(' + g_x.toString() + ',0)">';
+
+                            for (var j = 0; j < 5; j++) {
+                                var y = j * step;
+                                if (numc >= countNum) {
+                                    break
+                                } else {
+
+                                    var color = getColor(settings.data.id[numc].Err);
+                                    var urlOfFile = settings.data.id[numc].url;
+                                    var errCount = settings.data.id[numc].Err;
+                                    var datasetName = settings.data.id[numc].name;
+                                    var dataDupli = settings.data.id[numc].dupliRate;
+                                    var datasetComplet = settings.data.id[numc].completeness;
+                                    item_html += '<a href="{% url 'analyse_individual' foo  %}" ><rect class="day" width=11 height="11" y="' + y + '" fill="' + color + '" data-count="' + errCount + '" data-name="' + datasetName + '"data-dup="' + dataDupli + '"   data-complet="' + datasetComplet + '" />+</a>';
+                                    numc++;
+                                }
+                            }
+
+                            item_html += "</g>";
+
+                            loop_html += item_html;
+                    }
+{% endfor %}
+
+
+                        var wire_html =
+                            '<svg width="721" height="110" viewBox="0 0 721 110"  class="js-calendar-graph-svg">' +
+                            '<g transform="translate(20, 20)">' +
+                            loop_html +
+                            '</g>' +
+                            '</svg>';
+
+                        wrap_chart.html(wire_html);
+
+                        _this.find('rect').on("mouseenter", mouseEnter);
+                        _this.find('rect').on("mouseleave", mouseLeave);
+                        appendTooltip();
+                    }
+
+                //Mare sure off previous event
+                /*$(document).off('mouseenter', _this.find('rect'), mouseEnter );
+                $(document).off('mouseleave', _this.find('rect'), mouseLeave );
+                $(document).on('mouseenter', _this.find('rect'), mouseEnter );
+                $(document).on('mouseleave', _this.find('rect'), mouseLeave );
+        */
+
+
+                var mouseLeave = function (evt) {
+                    $('.svg-tip').hide();
+                }
+
+                //handle event mouseenter when enter into rect element
+                var mouseEnter = function (evt) {
+
+                    var target_offset = $(evt.target).offset();
+                    var targetName = $(evt.target).attr('data-name');
+                    var targetDupRate = $(evt.target).attr('data-dup');
+                    var targetCompleteness = $(evt.target).attr('data-complet');
+                    var count = $(evt.target).attr('data-count');
+
+
+                    var text = "<p>Dataset name:{0} <br/> DuplicateRate:{1} <br/> Completeness:{2} <br/> ErrorCount:{3}</p>".formatString(targetName, targetDupRate, targetCompleteness, count);
+
+                    var svg_tip = $('.svg-tip').show();
+                    svg_tip.html(text);
+                    var svg_width = Math.round(svg_tip.width() / 2 + 5);
+                    var svg_height = svg_tip.height() * 2 + 10;
+
+                    svg_tip.css({top: target_offset.top - svg_height - 5});
+                    svg_tip.css({left: target_offset.left - svg_width});
+                }
+                //Append tooltip to display when mouse enter the rect element
+                //Default is display:none
+                var appendTooltip = function () {
+                    if ($('.svg-tip').length == 0) {
+                        $('body').append('<div class="svg-tip svg-tip-one-line" style="display:none">   </div>');
+                    }
+                }
+
+
+                var settings = $.extend({
+                    //Default init settings.colors, user can override
+                    colors: ['#eeeeee', '#d6e685', '#8cc665', '#44a340', '#44a340'],
+                    start: null,
+                    data: null,
+                }, options);
+
+                var _this = $(this);
+
+                start();
+
+            };
+
+        }(jQuery));
+    </script>
+
+    <style type="text/css">
+        .seperate {
+            height: 20px;
+        }
+
+        body {
+            padding: 50px;
+        }
+        .menu{
+	height:92px;
+    background-color: white;
+	border-bottom:1px solid #eee;
+}
+.menu ul{padding:20px 0 0 45px;}
+.menu li{
+	list-style:none;
+	float:left;
+	margin-right:30px;
+	padding: 10px;
+	border-radius: 5px;
+}
+.menu li:hover{
+	background-color: #07832c8e;
+}
+.menu li a{
+	font-weight:700;
+	color:#333;
+	font-size:14px;
+	text-decoration:none;
+	text-transform:uppercase;
+	letter-spacing:1px;
+}
+.menuli a:hover{
+	color:#000;
+	cursor:pointer;
+}
+    </style>
+
+
+    <style type="text/css">
+        .seperate {
+            height: 20px;
+        }
+
+        .svg-tip {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #bbb;
+            font-size: 12px;
+            position: absolute;
+            z-index: 99999;
+            text-align: center;
+            border-radius: 3px;
+        }
+
+        .svg-tip:after {
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            height: 5px;
+            width: 5px;
+            bottom: -10px;
+            margin: 0 0 0 -5px;
+            content: " ";
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .carres {
+            margin-left: 20%;
+            margin-right: 20%;
+            margin-bottom: 5%;
+        }
+
+    </style>
+
+</head>
+{% csrf_token %}
+<body translate="no">
+<div class="menu">
+    <ul>
+        <li><a href="{% url 'accueil' %}">ACCUEIL</a></li>
+            <li><a href="{% url 'upload' %}">TELECHARGER FICHIER</a></li>
+            <li><a href="{% url 'analyse_general' %}">ANALYSE GLOBALE</a></li>
+        <li><a href="">CONTACT</a></li>
+    </ul>
+</div>
+<div class="content">
+    <div class="mainInfo">
+        <h1>KPI Qualité</h1>
+        <span>Analyse générale</span>
+        <div class="aboutMe">
+            <h3>Introduction</h3>
+            Sur cette page vous pouvez consulter:
+            <ul>
+                <li>Le pourcentage des erreurs par indicateurs</li>
+                <li>Le pourcentage de type de fichier</li>
+                <li>Une analyse par categories du nombre total de données et de celui de données correctes</li>
+                <li>Une analyse evolution de la qualité par année</li>
+                <li>Les 5 meilleurs Datasets</li>
+            </ul>
+        </div>
+    </div>
+    <div class="matchStats">
+        <div class="backgroundText">Types</div>
+        <canvas id="gameStats" width="180" height="180"/>
+    </div>
+
+    <div class="matchStats">
+        <div class="backgroundText">Erreurs</div>
+        <canvas id="roleStats" width="180" height="180"/>
+    </div>
+
+    <div class="clearFix"></div>
+
+    <div class="col">
+        <div class="titre-bas">
+            <h2>Analyse par catégorie</h2>
+        </div>
+        <div class="resizing">
+            <canvas id="champData"/>
+        </div>
+    </div>
+    <div class="col middle">
+        <h2>Tendances</h2>
+        <div class="resizing">
+            <canvas id="timeData"/>
+        </div>
+    </div>
+    <div class="col">
+        <h2>Les 5 meilleurs Datasets</h2>
+        <ul class="playerStats">
+            {% for dataset in list3 %}
+                <li>
+                    <a href="{% url 'analyse_individual' fname=dataset.url %}"><span>{{ dataset.filename }}</span></a>{{ dataset.averageScore }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<script src="https://cpwebassets.codepen.io/assets/common/stopExecutionOnTimeout-157cd5b220a5c80d4ff8e0e70ac069bffd87a61252088146915e8726e5d9f147.js"></script>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.1/Chart.min.js'></script>
+
+<script id="rendered-js">
+
+
+    // Erreurs par dimension
+    var roleStats = [
+        {
+            value: {{averageInconsistentRate}},
+            color: "#F7464A",
+            highlight: "#FF5A5E",
+            label: "Cohérence"
+        },
+
+        {
+            value: {{averageIncompleteRate}},
+            color: "#46BFBD",
+            highlight: "#5AD3D1",
+            label: "Complétude"
+        },
+
+        {
+            value: {{averageDupRate}},
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Unicité"
+        },
+
+        {
+            value: {{averageInconformRate}},
+            color: "#949FB1",
+            highlight: "#A8B3C5",
+            label: "Validité"
+        },
+
+        // {
+        //     value: 220,
+        //     color: "#4D5360",
+        //     highlight: "#616774",
+        //     label: "Time-related"
+        // }
+    ];
+
+
+    var ctx = document.getElementById("roleStats").getContext("2d");
+    ctx.canvas.width = 180;
+    ctx.canvas.height = 180;
+    window.myPolarArea = new Chart(ctx).PolarArea(roleStats, {responsive: false});
+
+
+    // Types de fichier en pourcentage
+    var gameStats = [
+        {
+            value: {{typePercentage}},
+            color: "#949FB1",
+            highlight: "#A8B3C5",
+            label: "CSV"
+        },
+        /*
+        {
+            value: 0,
+            color: "#46BFBD",
+            highlight: "#5AD3D1",
+            label: "PDF"
+        },
+
+        {
+            value: 0,
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Excel"
+        },
+
+        {
+            value: 0,
+            color: "#F7464A",
+            highlight: "#FF5A5E",
+            label: "Text"
+        },
+        {
+            value: 0,
+            color: "#4D5360",
+            highlight: "#616774",
+            label: "Word"
+        }
+        */
+    ];
+
+
+    var ctx = document.getElementById("gameStats").getContext("2d");
+    ctx.canvas.width = 180;
+    ctx.canvas.height = 180;
+    window.myDoughnut = new Chart(ctx).Doughnut(gameStats, {});
+
+
+    // Analyse par catégorie
+    var ac_jsonStr = JSON.parse('{{ acJson|safe }}');
+    var labelsInput = []
+    var totalInput = []
+    var corretInput = []
+
+    for (var i = 0; i < ac_jsonStr.id.length; i++) {
+        labelsInput.push(ac_jsonStr.id[i].Cat)
+        totalInput.push(ac_jsonStr.id[i].totalValues)
+        corretInput.push(ac_jsonStr.id[i].correctValues)
+    }
+
+    var champData = {
+        labels: labelsInput,
+        datasets: [
+            {
+                label: "Nb Total de donnees par catégorie",
+                fillColor: "rgba(220,220,220,0.5)",
+                strokeColor: "rgba(220,220,220,0.8)",
+                highlightFill: "rgba(220,220,220,0.75)",
+                highlightStroke: "rgba(220,220,220,1)",
+                data: totalInput
+            },
+
+            {
+                label: "Nb Total des donnees correctes par catégorie",
+                fillColor: "rgba(151,187,205,0.5)",
+                strokeColor: "rgba(151,187,205,0.8)",
+                highlightFill: "rgba(151,187,205,0.75)",
+                highlightStroke: "rgba(151,187,205,1)",
+                data: corretInput
+            }]
+    };
+
+
+    var ctx = document.getElementById("champData").getContext("2d");
+    window.myBarChart = new Chart(ctx).Bar(champData, {responsive: true});
+
+
+    var yearJson = JSON.parse('{{yearJson|safe}}')
+
+    // Comparaison par année
+
+    labelsInput = []
+    totalInput = []
+    var lowerInput = []
+    for (var i = 0; i < yearJson.id.length; i++) {
+        labelsInput.push(yearJson.id[i].Annee)
+        totalInput.push(yearJson.id[i].Total)
+        lowerInput.push(yearJson.id[i].Lower)
+    }
+
+    var timeData = {
+        labels: labelsInput,
+        datasets: [
+            {
+                label: "Nb Total de donnees par année",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: totalInput
+            },
+
+            {
+                label: "Nb Total des donnees correctes par année",
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: "rgba(151,187,205,1)",
+                pointColor: "rgba(151,187,205,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(151,187,205,1)",
+                data: lowerInput
+            }]
+    };
+
+
+    var ctx = document.getElementById("timeData").getContext("2d");
+    window.myLineChart = new Chart(ctx).Line(timeData, {responsive: true});
+
+</script>
+
+<div class="carres">
+    <h2></h2>
+    <div class="seperate"></div>
+    <h3>Carrés des datasets</h3>
+    <div id="github_chart_3">
+
+    </div>
+
+    <div class="svg-tip svg-tip-one-line" style="top: 264.425px; left: 645px; display: none;">0 comment on 2021-05-11
+    </div>
+</div>
+
+<button class="button"><a href="{% url 'accueil' %}">Accueil</a></button>
+</body>
+
+</html>

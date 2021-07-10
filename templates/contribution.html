@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+    {% load static %}
+    <title>Github Contribution Graph Demo</title>
+    <script type="text/javascript" src="{% static 'dashboard/js/jquery-2.1.1.js' %}"></script>
+    <script type="text/javascript" src="{% static 'dashboard/js/contribution.js' %}"></script>
+    <link href="{% static 'dashboard/css/github_contribution_graph.css' %}" media="all" rel="stylesheet">
+
+    <script type="text/javascript">
+
+
+        function getJsonStr(datasets_jsonstr) {
+
+            var jsonArray = JSON.parse(datasets_jsonstr)
+            var return_list = jsonArray
+            return return_list;
+        }
+
+        $(document).ready(function () {
+
+            var datasets_jsonStr  = JSON.parse('{{ dataSetJson|escapejs }}');
+
+
+            $('#github_chart_3').github_graph({
+                start: null,
+                //Generate random entries from 10-> 100 entries
+                data: datasets_jsonStr,
+                //override colours
+                colors: ['#eeeeee', '#d6e685', '#8cc665', '#44a340', '#44a340']
+            });
+
+        });
+    </script>
+
+    <style type="text/css">
+        .seperate {
+            height: 20px;
+        }
+
+        body {
+            padding: 50px;
+        }
+    </style>
+</head>
+
+
+<body data-new-gr-c-s-check-loaded="14.985.0" data-gr-ext-installed="">
+{% csrf_token %}
+<h2>GITHUB CONTRIBUTION GRAPH DEMO</h2>
+
+<div class="seperate"></div>
+<h3>Start in 2021</h3>
+<div id="github_chart_3">
+
+</div>
+
+<div class="svg-tip svg-tip-one-line" style="top: 264.425px; left: 645px; display: none;">0 comment on 2021-05-11</div>
+
+</body>
+</html>

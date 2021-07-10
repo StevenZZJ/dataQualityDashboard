@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+
+
+    <title>Datalake</title>
+    <link type="text/css" rel="stylesheet" href="{% static 'dashboard/css/styledatalake.css' %}">
+    <script src="{% static 'dashboard/js/jquery-2.1.1.js' %}"></script>
+    <script src="{% static 'dashboard/js/fonctionsdatalake.js' %}"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js'></script>
+    <script>
+        {#window.onload = function (consistency,completeness,uniqueness,validity,canvasID) {#}
+
+        function draw(consistency, completeness, uniqueness, validity, canvasID) {
+            var iddoc = document.getElementById(canvasID)
+
+            const data = {
+                labels: [
+                    'Consistency',
+                    'Completeness',
+                    'Uniqueness',
+                    'Validity'
+                ],
+                datasets: [{
+                    label: 'Pourcentage de qualité par dimension',
+                    data: [consistency, completeness, uniqueness, validity],
+                    fill: true,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    pointBackgroundColor: 'rgb(255, 99, 132)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(255, 99, 132)'
+                }
+                ]
+            };
+
+            const config = {
+                type: 'radar',
+                data: data,
+                options: {
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    },
+                    scale: {
+                        ticks: {
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                        }
+                    }
+
+                },
+            };
+
+            window.myRadar = new Chart(iddoc, config);
+        };
+    </script>
+
+
+</head>
+
+<body translate="no">
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+<div id="wrapper">
+
+
+    <div id="checkout">
+        Comparer
+    </div>
+
+
+    <div id="header">
+        <ul>
+            <li><a href="{% url 'accueil' %}">ACCUEIL</a></li>
+            <li><a href="{% url 'upload' %}">TELECHARGER FICHIER</a></li>
+            <li><a href="{% url 'analyse_general' %}">ANALYSE GLOBALE</a></li>
+            <li><a href="">CONTACT</a></li>
+        </ul>
+        <div class="containersearch">
+            <input type="search" placeholder="Search...">
+            <div class="search"></div>
+        </div>
+    </div>
+
+
+    <div id="sidebar">
+
+
+        <h3>CATEGORIES</h3>
+        <div class="checklist categories">
+            <ul>
+                {% for cat in categories %}
+                    <li><a href=""><span></span>{{ cat.NomCategory }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+
+        <h3>Pays</h3>
+        <div class="checklist sizes">
+            <ul>
+                {% for pay in pays %}
+                    <li><a href=""><span></span>{{ pay.NomPays }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <h3>TYPES</h3>
+        <div class="checklist categories">
+            <ul>
+                <li><a href=""><span></span>Structuré</a></li>
+                <li><a href=""><span></span>Semi-structuré</a></li>
+                <li><a href=""><span></span>Non structuré</a></li>
+            </ul>
+        </div>
+
+        <h3>TIME RANGE</h3>
+        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/price-range.png" alt=""/>
+    </div>
+
+
+    <div id="grid-selector">
+        <div id="grid-menu">
+            <a style="margin-left: 5px">View:</a>
+            <ul>
+                <li class="largeGrid"><a href=""></a></li>
+                <li class="smallGrid"><a class="active" href=""></a></li>
+            </ul>
+        </div>
+
+        <a>{{ datasetcount }} résultats,</a>
+    </div>
+
+    <div id="grid">
+        {% for i in datasets %}
+            <div class="product">
+                <div class="info-large">
+                    <h4>{{ i.name }}</h4>
+
+                    <div class="sku">
+                        Categorie: <strong>{{ i.cat }}</strong>
+                    </div>
+                    <div class="price-big">
+                        <span></span>% {{ i.score }}
+                    </div>
+                    <h3>Pays</h3>
+                    <div class="sizes-large">
+                        <span>{{ i.pays }}</span>
+                    </div>
+
+                    <button class="add-cart-large">Rapport de qualité</button>
+
+                </div>
+                <div class="make3D">
+                    <div class="product-front">
+                        <div class="shadow"></div>
+                        <img src="{% static i.type %}" alt=""/>
+                        <div class="image_overlay"></div>
+                        <!--<div class="add_to_cart">Comparer</div>-->
+                        <div class="add_to_cart"><a href="{% url 'analyse_individual' fname=i.csv %}">Rapport</a></div>
+{#                        <div class="add_to_cart">Rapport</div>#}
+                        <div class="view_gallery">Details</div>
+                        <!--<div class="lien vers le rapport">Rapport de qualité</div>-->
+                        <div class="stats">
+                            <div class="stats-container">
+                                <span class="product_price">% {{ i.score }}</span>
+                                <span class="product_name">{{ i.name }}</span>
+                                <p>Categorie</p>
+                                <a>{{ i.cat }}</a>
+
+                                <div class="product-options">
+                                    <strong>Pays</strong>
+                                    <span>{{ i.pays }}</span>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="product-back">
+                        <div class="shadow"></div>
+                        <div class="carousel">
+                            <div id="chartjs-radar">
+                                <canvas id="{{ i.name }}"></canvas>
+                                <script>draw({{ i.consistency }},
+                                    {{i.completeness}},
+                                    {{i.uniqueness}},
+                                    {{i.validity}},
+                                    '{{i.name}}')
+                                </script>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <div class="cy"></div>
+                            <div class="cx"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        {% endfor %}
+
+
+    </div>
+</div>
+
+</body>
+
+<!--radar-->
+
+
+</html>

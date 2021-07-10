@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<head>
+    {% load static %}
+    <title>Type des colonnes</title>
+    <meta charset="UTF-8">
+    {#    <link type="text/css" rel="stylesheet" href='../static/css/styletype.css'>#}
+    <link href="{% static '/dashboard/css/styletype.css' %}" rel="stylesheet">
+    <link href="{% static '/dashboard/css/bootstrap.css' %}" rel="stylesheet">
+    <script src="{% static '/dashboard/js/bootstrap.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>
+        var myList = {{ data }};
+
+        // Builds the HTML Table out of myList.
+        function buildHtmlTable(selector) {
+            var columns = addAllColumnHeaders(myList, selector);
+
+            for (var i = 0; i < myList.length; i++) {
+                var row$ = $('<tr/>');
+                for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+                    var cellValue = myList[i][columns[colIndex]];
+                    if (cellValue == null) cellValue = "";
+                    row$.append($('<td/>').html(cellValue));
+                }
+                $(selector).append(row$);
+            }
+        }
+
+        // Adds a header row to the table and returns the set of columns.
+        // Need to do union of keys from all records as some records may not contain
+        // all records.
+        function addAllColumnHeaders(myList, selector) {
+            var columnSet = [];
+            var headerTr = $('<tr/>');
+
+            for (var i = 0; i < myList.length; i++) {
+                var rowHash = myList[i];
+                for (var key in rowHash) {
+                    if ($.inArray(key, columnSet) == -1) {
+                        columnSet.push(key);
+                        headerTr.append($('<th/>').html(key));
+                    }
+                }
+            }
+            $(selector).append(headerTr);
+
+            return columnSet;
+        }
+    </script>
+
+    <script type="text/javascript">
+        function AfficherColonne3(label) {
+            var col2 = document.getElementById(label)
+            var info = document.getElementById("colonne3")
+            var col3 = document.getElementById("colonne3_" + label)
+            var array = ["iffloat_", "ifboolean_", "ifdate_", "iftexte_", "ifldc_"]
+            if (col2.options[1].selected == true) {
+                info.style.display = "block";
+                col3.style.display = "block";
+                for (var i = 0; i < array.length; i++) {
+                    document.getElementById(array[i] + label).style.display = 'none';
+                }
+                document.getElementById("iffloat_" + label).style.display = 'block';
+            } else if (col2.options[2].selected == true) {
+                info.style.display = "block";
+                col3.style.display = "block";
+                for (var i = 0; i < array.length; i++) {
+                    document.getElementById(array[i] + label).style.display = 'none';
+                }
+                document.getElementById("ifboolean_" + label).style.display = 'block';
+            } else if (col2.options[3].selected == true) {
+                info.style.display = "block";
+                col3.style.display = "block";
+                for (var i = 0; i < array.length; i++) {
+                    document.getElementById(array[i] + label).style.display = 'none';
+                }
+                document.getElementById("ifdate_" + label).style.display = 'block';
+            } else if (col2.options[4].selected == true) {
+                info.style.display = "block";
+                col3.style.display = "block";
+                for (var i = 0; i < array.length; i++) {
+                    document.getElementById(array[i] + label).style.display = 'none';
+                }
+                document.getElementById("iftexte_" + label).style.display = 'block';
+            } else if (col2.options[5].selected == true) {
+                info.style.display = "block";
+                col3.style.display = "block";
+                for (var i = 0; i < array.length; i++) {
+                    document.getElementById(array[i] + label).style.display = 'none';
+                }
+                document.getElementById("ifldc_" + label).style.display = 'block';
+            } else {
+                info.style.display = "none";
+                col3.style.display = "none";
+                for (var i = 0; i < array.length; i++) {
+                    document.getElementById(array[i] + label).style.display = 'none';
+                }
+            }
+        }
+    </script>
+</head>
+<body onload="buildHtmlTable('#df')">
+<div class="menu">
+    <ul>
+        <li><a href="accueil.html">ACCUEIL</a></li>
+        <li><a href="upload plus.html">TELECHARGER FICHIER</a></li>
+        <li><a href="TBGeneral.html">ANALYSE GLOBALE</a></li>
+        <li><a href="">CONTACT</a></li>
+    </ul>
+</div>
+<div class="afficherfichier">
+    <h1>Les 5 premières lignes de votre fichier</h1>
+    <div class="contenufichier">
+        <!--contenu de la page-->
+        <table class="table table-striped table-hover" id="df">
+        </table>
+    </div>
+</div>
+<div class="choosetype">
+    <form enctype="multipart/form-data" action="/showtype" method="post">
+        {% csrf_token %}
+        <div style="display: none">
+            <input type="text" name="fname" value="{{ fname }}">
+            <input type="text" name="nom_dataset" value="{{ nom_dataset }}">
+        </div>
+        <table>
+            <tr>
+                <th>
+                    Colonne
+                </th>
+                <th>
+                    Statut
+                </th>
+                <th>
+                    Type
+                </th>
+                <th>
+                    <div class="colonne3" id="colonne3" style="display: none">
+                        Info Supplementaires
+                    </div>
+                </th>
+            </tr>
+            {% for label in labels %}
+                <tr>
+                    <td>
+                        {{ label }}
+                    </td>
+                    <td>
+                        <input type="radio" name="statut_{{ label }}" value="1" checked> obligatoire
+                        <input type="radio" name="statut_{{ label }}" value="0"> optionnel
+                    </td>
+                    <td>
+                        <select name="type" id="{{ label }}" onchange="AfficherColonne3('{{ label }}')">
+                            <option value="integer">Integer</option>
+                            <option value="float">Float</option>
+                            <option value="Boolean">Boolean</option>
+                            <option value="Date">Date</option>
+                            <option value="Text">Texte</option>
+                            <option value="LChoix">Liste de choix</option>
+                        </select>
+                    </td>
+                    <td class="colonne3" style="display: none" id="colonne3_{{ label }}">
+                        <div id="iffloat_{{ label }}" style="display: none">
+                            <!--if float-->
+                            <label>Nombre de chiffres après la virgule
+                                <input type="number" name="float">
+                            </label>
+                        </div>
+                        <div id="ifboolean_{{ label }}" style="display: none">
+                            <!--if boleean-->
+                            <select name="boolean">
+                                <option value="">Choisissez le format booléen</option>
+                                <option value="TF">true/false</option>
+                                <option value="VF">vrai/faux</option>
+                                <option value="no">1/0</option>
+                            </select>
+                        </div>
+                        <div id="ifdate_{{ label }}" style="display: none">
+                            <!--if date-->
+                            <select name="date">
+                                <option value="">Choisissez le format de date</option>
+                                <option value="jmaa/">jj/mm/aaaa</option>
+                                <option value="jma/">jj/mm/aa</option>
+                                <option value="mja/">mm/jj/aa</option>
+                                <option value="aamj/">aaaa/mm/jj</option>
+                                <option value="amj/">aa/mm/jj</option>
+                                <option value="ajm/">aa/jj/mm</option>
+                                <option value="jmaa.">jj.mm.aaaa</option>
+                                <option value="jma.">jj.mm.aa</option>
+                                <option value="mja.">mm.jj.aa</option>
+                                <option value="aamj.">aaaa.mm.jj</option>
+                                <option value="amj.">aa.mm.jj</option>
+                                <option value="ajm.">aa.jj.mm</option>
+                                <option value="jmoisaa">jj mois aaaa</option>
+                                <option value="jma">jj mois aa</option>
+                            </select>
+                        </div>
+                        <div id="iftexte_{{ label }}" style="display: none">
+                            <!--if texte-->
+                            <label>Nombre maximum de caractères
+                                <input type="number" name="text">
+                            </label>
+                        </div>
+                        <div id="ifldc_{{ label }}" style="display: none">
+                            <!--if liste de choix-->
+                            <label>Introduisez les valeurs admisibles séparées par un point et virgule
+                                <input type="text" name="listechoix">
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </table>
+        <input id="bouton" type="submit" value="submit">
+    </form>
+</div>
+
+
+</body>

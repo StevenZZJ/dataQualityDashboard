@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+
+    <!--
+    <link rel="apple-touch-icon" type="image/png" href="https://cpwebassets.codepen.io/assets/favicon/apple-touch-icon-5ae1a0698dcc2402e9712f7d01ed509a57814f994c660df9f7a952f3060705ee.png" />
+    <meta name="apple-mobile-web-app-title" content="CodePen">
+    <link rel="shortcut icon" type="image/x-icon" href="https://cpwebassets.codepen.io/assets/favicon/favicon-aec34940fbc1a6e787974dcd360f2c6b63348d4b1f4e06c77743096d55480f33.ico" />
+    <link rel="mask-icon" type="" href="https://cpwebassets.codepen.io/assets/favicon/logo-pin-8f3771b1072e3c38bd662872f6b673a722f4b3ca2421637d5596661b4e2132cc.svg" color="#111" />
+    -->
+
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css'>
+    <link type="text/css" rel="stylesheet" href="{% static '/dashboard/css/style.css' %}">
+
+    <script>
+        window.console = window.console || function (t) {
+        };
+    </script>
+
+    <!--<script>
+    if (document.location.search.match(/type=embed/gi)) {
+        window.parent.postMessage("resize", "*");
+    }
+    </script>-->
+    <script type="text/javascript">
+        function AfficherMesures1() {
+            var x = document.getElementById("details1");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
+        function AfficherMesures2() {
+            var x = document.getElementById("details2");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
+        function AfficherMesures3() {
+            var x = document.getElementById("details3");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
+        function AfficherMesures4() {
+            var x = document.getElementById("details4");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+    </script>
+    <style>
+        #details1 {
+            display: none;
+        }
+
+        #details2 {
+            display: none;
+        }
+
+        #details3 {
+            display: none;
+        }
+
+        #details4 {
+            display: none;
+        }
+
+        .menu {
+            height: 92px;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .menu ul {
+            padding: 20px 0 0 45px;
+        }
+
+        .menu li {
+            list-style: none;
+            float: left;
+            margin-right: 30px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .menu li:hover {
+            background-color: #07832c8e;
+        }
+
+        .menu li a {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menuli a:hover {
+            color: #000;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body translate="no">
+<div class="menu">
+    <ul>
+        <li><a href="{% url 'accueil' %}">ACCUEIL</a></li>
+            <li><a href="{% url 'upload' %}">TELECHARGER FICHIER</a></li>
+            <li><a href="{% url 'analyse_general' %}">ANALYSE GLOBALE</a></li>
+        <li><a href="">CONTACT</a></li>
+    </ul>
+</div>
+<div class="content">
+    <div class="report-overview-module"></div>
+</div>
+<!--<script src="https://cpwebassets.codepen.io/assets/common/stopExecutionOnTimeout-157cd5b220a5c80d4ff8e0e70ac069bffd87a61252088146915e8726e5d9f147.js"></script>
+-->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script id="rendered-js">
+    (function umd(root, name, factory) {
+        'use strict';
+        if ('function' === typeof define && define.amd) {
+            // AMD. Register as an anonymous module.
+            define(name, ['jquery'], factory);
+        } else {
+            // Browser globals
+            root[name] = factory();
+        }
+    })(this, 'ReportOverviewModule', function UMDFactory() {
+        'use strict';
+
+        var ReportOverview = ReportOverviewConstructor;
+
+        reportCircleGraph();
+
+        return ReportOverview;
+
+        function ReportOverviewConstructor(options) {
+
+            var factory = {
+                    init: init
+                },
+
+
+                _elements = {
+                    $element: options.element
+                };
+
+
+            init();
+
+            return factory;
+
+            function init() {
+
+                _elements.$element.append($(getTemplateString()));
+
+                $('.delivery-rate1').percentCircle({
+                    width: 130,
+                    trackColor: '#ececec',
+                    barColor: '#f5ab34',
+                    barWeight: 5,
+                    endPercent: {{completeRate}}/100,
+                    fps: 60
+                });
+
+                $('.delivery-rate').percentCircle({
+                    width: 130,
+                    trackColor: '#ececec',
+                    barColor: '#f5ab34',
+                    barWeight: 5,
+                    endPercent: {{consistenRate}}/100,
+                    fps: 60
+                });
+
+
+                $('.open-rate').percentCircle({
+                    width: 130,
+                    trackColor: '#ececec',
+                    barColor: '#30afe4',
+                    barWeight: 5,
+                    endPercent: {{ uniqunessRate }}/100,
+                    fps: 60
+                });
+
+
+                $('.click-to-open').percentCircle({
+                    width: 130,
+                    trackColor: '#ececec',
+                    barColor: '#80cdbe',
+                    barWeight: 5,
+                    endPercent: {{ conformRate }}/100,
+                    fps: 60
+                });
+
+            }
+
+            function getTemplateString() {
+                return [
+                    '<div>',
+                    '<h2>Rapport de qualité</h2>',
+                    '<div class="row">',
+                    '<div class="col-md-12">',
+
+                    '<div class="report-statistic-box">',
+                    '<div class="box-header">Completness</div>',
+                    '<div class="box-content delivery-rate1">',
+                    //substituer ici le 90%
+                    '<div class="percentage">{{ completeRate }}%</div>'.replace(/{{ completeRate }}/, options.data.completeRate),
+                        '</div>',
+                        '<div class="box-foot">',
+                        '<span class="arrow arrow-up"></span>',
+                        //substituer ici le 90%
+                        '<div class="box-foot-left">Incomplete Values<br><span class="box-foot-stats"><strong>{{incompleteValues}}</strong>'.replace(/{{incompleteValues}}/, options.data.incompleteValues),
+                            '({{ incompleteRate }}%)</span></div>'.replace(/{{ incompleteRate }}/,options.data.incompleteRate),
+                                '<span class="arrow arrow-down"></span>',
+                                //substituer ici le 10% et 120
+                                '<div class="box-foot-right">Complete Values<br><span class="box-foot-stats" ><strong>{{ completeValues }}</strong>'.replace(/{{ completeValues }}/,options.data.completeValues),
+                                    ' ({{ completeRate }}%)</span></div>'.replace(/{{ completeRate }}/,options.data.completeRate),
+                                        '</div>',
+                                        '<div class="button">',
+                                        '<button type="button" onclick="AfficherMesures1()">Details</button>',
+                                        '</div>',
+                                        '</div>',
+
+                                        '<div class="report-statistic-box">',
+                                        '<div class="box-header">Consistency</div>',
+                                        '<div class="box-content delivery-rate">',
+                                        //substituer ici le 90%
+                                        '<div class="percentage">{{ consistenRate }}%</div>'.replace(/{{ consistenRate }}/, options.data.consistenRate),
+                                            '</div>',
+                                            '<div class="box-foot">',
+                                            '<span class="arrow arrow-up"></span>',
+                                            //substituer ici le 90%
+                                            '<div class="box-foot-left">Inconsistent Values<br><span class="box-foot-stats"><strong>{{inconsistentValues}}</strong>'.replace(/{{inconsistentValues}}/, options.data.inconsistentValues),
+                                                '({{ inconsistenRate }}%)</span></div>'.replace(/{{ inconsistenRate }}/,options.data.inconsistenRate),
+                                                    '<span class="arrow arrow-down"></span>',
+                                                    //substituer ici le 10% et 120
+                                                    '<div class="box-foot-right">Consistent Values<br><span class="box-foot-stats" ><strong>{{ consistenValues }}</strong>'.replace(/{{ consistenValues }}/,options.data.consistenValues),
+                                                        '({{ consistenRate}}%)</span></div>'.replace(/{{ consistenRate }}/,options.data.consistenRate),
+                                                            '</div>',
+                                                            '<div class="button">',
+                                                            '<button type="button" onclick="AfficherMesures2()">Details</button>',
+                                                            '</div>',
+                                                            '</div>',
+
+                                                            '<div class="report-statistic-box">',
+                                                            '<div class="box-header">Uniqueness</div>',
+                                                            '<div class="box-content open-rate">',
+                                                            //substituer ici le 75%
+                                                            '<div class="percentage ">{{ uniqunessRate }}%</div>'.replace(/{{ uniqunessRate }}/, options.data.uniqunessRate),
+                                                                '</div>',
+                                                                '<div class="box-foot">',
+                                                                '<span class="arrow arrow-up"></span>',
+                                                                //substituer ici le 75%
+                                                                '<div class="box-foot-left">Dublicates<br><span class="box-foot-stats"><strong>{{duplicates}}</strong>'.replace(/{{duplicates}}/, options.data.duplicates),
+                                                                    '({{ dupRate }}%)</span></div>'.replace(/{{ dupRate }}/,options.data.dupRate),
+                                                                        '<span class="arrow arrow-down"></span>',
+                                                                        //substituer ici le 25% et 120
+                                                                        '<div class="box-foot-right">Unique Values<br><span class="box-foot-stats"><strong>{{ uniqueValues }}</strong>'.replace(/{{ uniqueValues }}/, options.data.uniqueValues),
+                                                                            '({{ uniqunessRate }}%)</span></div>'.replace(/{{ uniqunessRate }}/,options.data.uniqunessRate),
+                                                                                '</div>',
+                                                                                '<div class="button">',
+                                                                                '<button type="button" onclick="AfficherMesures3()">Details</button>',
+                                                                                '</div>',
+                                                                                '</div>',
+                                                                                '<div class="report-statistic-box">',
+                                                                                '<div class="box-header">Validity</div>',
+                                                                                '<div class="box-content click-to-open">',
+                                                                                //substituer ici le 50%
+                                                                                '<div class="percentage">{{ conformRate }}%</div>'.replace(/{{ conformRate }}/,options.data.conformRate),
+                                                                                    '</div>',
+                                                                                    '<div class="box-foot">',
+                                                                                    '<span class="arrow arrow-up"></span>',
+                                                                                    //substituer ici le 50%
+                                                                                    '<div class="box-foot-left">Incorrect Values<br><span class="box-foot-stats"><strong>{{incorrectValues}}</strong> '.replace(/{{incorrectValues}}/, options.data.incorrectValues),
+                                                                                        '({{ inconformRate }}%)</span></div>'.replace(/{{ inconformRate }}/,options.data.inconformRate),
+                                                                                            '<span class="arrow arrow-down"></span>',
+                                                                                            //substituer ici le 50% et 120
+                                                                                            '<div class="box-foot-right">Valid Values<br><span class="box-foot-stats"><strong>{{ validValues }}</strong>'.replace( /{{ validValues }}/,options.data.validValues),
+                                                                                                '({{ conformRate }}%)</span></div>'.replace(/{{ conformRate }}/,options.data.conformRate),
+                                                                                                    '</div>',
+                                                                                                    '<div class="button">',
+                                                                                                    '<button type="button" onclick="AfficherMesures4()">Details</button>',
+                                                                                                    '</div>',
+                                                                                                    '</div>',
+                                                                                                    '</div>',
+                                                                                                    '</div>',
+                                                                                                    '<div class="row">',
+                                                                                                    '<div class="col-md-12">',
+                                                                                                    '<div class="details">',
+                                                                                                    '<div id="details4" class="details4">',
+                                                                                                    '<div class="mesure11">',
+                                                                                                    '<p>No value missing</p>',
+                                                                                                    '<div class="contenumesure">',
+                                                                                                    '<strong>{{ novaluemiss }}</strong>'.replace(/{{ novaluemiss }}/, options.data.novaluemiss),
+                                                                                                        '</div>',
+                                                                                                        '</div>',
+                                                                                                        '<div class="mesure12">',
+                                                                                                        '<p>CompleteInfo</p>',
+                                                                                                        '<div class="contenumesure">',
+                                                                                                        '<strong>{{ completeInfo }}</strong>'.replace(/{{ completeInfo }}/, options.data.completeInfo),
+                                                                                                            '</div>',
+                                                                                                            '</div>',
+                                                                                                            '</div>',
+                                                                                                            '<div id="details3" class="details3">',
+                                                                                                            '<div class="mesure21">',
+                                                                                                            '<p>Same data consistency</p>',
+                                                                                                            '<div class="contenumesure">',
+                                                                                                            '<strong>{{ same_data_consistency }}</strong>'.replace(/{{ same_data_consistency }}/, options.data.same_data_consistency),
+                                                                                                                '</div>',
+                                                                                                                '</div>',
+                                                                                                                '<div class="mesure22">',
+                                                                                                                '<p>Outlier</p>',
+                                                                                                                '<div class="contenumesure">',
+                                                                                                                '<strong>{{ nb_outlier }}</strong>'.replace(/{{ nb_outlier }}/, options.data.nb_outlier),
+                                                                                                                    '</div>',
+                                                                                                                    '</div>',
+                                                                                                                    '</div>',
+
+                                                                                                                    '<div id="details2" class="details2">',
+                                                                                                                    '<div class="mesure31">',
+                                                                                                                    '<p>Duplicates Rate</p>',
+                                                                                                                    '<div class="contenumesure">',
+                                                                                                                    '<strong>{{ dupRate }}%</strong>'.replace(/{{ dupRate }}/, options.data.dupRate),
+                                                                                                                        '</div>',
+                                                                                                                        '</div>',
+                                                                                                                        '<div class="mesure32">',
+                                                                                                                        '<p>Redundancy</p>',
+                                                                                                                        '<div class="contenumesure">',
+                                                                                                                        '<strong>{{ redundancy }}%</strong>'.replace(/{{ redundancy }}/, options.data.redundancy),
+                                                                                                                            '</div>',
+                                                                                                                            '</div>',
+                                                                                                                            '</div>',
+
+                                                                                                                            '<div id="details1" class="details1">',
+                                                                                                                            '<div class="mesure41">',
+                                                                                                                            '<p>conform rate</p>',
+                                                                                                                            '<div class="contenumesure">',
+                                                                                                                            '<strong>{{ conformRate }}%</strong>'.replace(/{{ conformRate }}/, options.data.conformRate),
+                                                                                                                                '</div>',
+                                                                                                                                '</div>',
+                                                                                                                                '<div class="mesure42">',
+                                                                                                                                '<p>Mesure 2</p>',
+                                                                                                                                '<div class="contenumesure">',
+                                                                                                                                //ici code afficher mesure
+                                                                                                                                '</div>',
+                                                                                                                                '</div>',
+                                                                                                                                '</div>',
+                                                                                                                                '</div>',
+                                                                                                                                '</div>',
+                                                                                                                                '</div>'].join('');
+            }
+        }
+
+        function reportCircleGraph() {
+
+            $.fn.percentCircle = function pie(options) {
+
+                var settings = $.extend({
+                        width: 130,
+                        trackColor: '#fff',
+                        barColor: '#fff',
+                        barWeight: 5,
+                        startPercent: 0,
+                        endPercent: 1,
+                        fps: 60
+                    },
+                    options);
+
+                this.css({
+                    width: settings.width,
+                    height: settings.width
+                });
+
+
+                var _this = this,
+                    canvasWidth = settings.width,
+                    canvasHeight = canvasWidth,
+                    id = $('canvas').length,
+                    canvasElement = $('<canvas id="' + id + '" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>'),
+                    canvas = canvasElement.get(0).getContext('2d'),
+                    centerX = canvasWidth / 2,
+                    centerY = canvasHeight / 2,
+                    radius = settings.width / 2 - settings.barWeight / 2,
+                    counterClockwise = false,
+                    fps = 1000 / settings.fps,
+                    update = 0.01;
+
+                this.angle = settings.startPercent;
+
+                this.drawInnerArc = function (startAngle, percentFilled, color) {
+                    var drawingArc = true;
+                    canvas.beginPath();
+                    canvas.arc(centerX, centerY, radius, Math.PI / 180 * (startAngle * 360 - 90), Math.PI / 180 * (percentFilled * 360 - 90), counterClockwise);
+                    canvas.strokeStyle = color;
+                    canvas.lineWidth = settings.barWeight - 2;
+                    canvas.stroke();
+                    drawingArc = false;
+                };
+
+                this.drawOuterArc = function (startAngle, percentFilled, color) {
+                    var drawingArc = true;
+                    canvas.beginPath();
+                    canvas.arc(centerX, centerY, radius, Math.PI / 180 * (startAngle * 360 - 90), Math.PI / 180 * (percentFilled * 360 - 90), counterClockwise);
+                    canvas.strokeStyle = color;
+                    canvas.lineWidth = settings.barWeight;
+                    canvas.lineCap = 'round';
+                    canvas.stroke();
+                    drawingArc = false;
+                };
+
+                this.fillChart = function (stop) {
+                    var loop = setInterval(function () {
+                        canvas.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                        _this.drawInnerArc(0, 360, settings.trackColor);
+                        _this.drawOuterArc(settings.startPercent, _this.angle, settings.barColor);
+
+                        _this.angle += update;
+
+                        if (_this.angle > stop) {
+                            clearInterval(loop);
+                        }
+                    }, fps);
+                };
+
+                this.fillChart(settings.endPercent);
+                this.append(canvasElement);
+                return this;
+
+            };
+
+        }
+
+        function getMockData() {
+            return {
+
+
+                //substituer ici
+                date: '2014-12-01',
+                sentTotal: {{ sentTotal }},
+                incompleteValues: {{ incompleteValues }},
+                duplicates: {{ duplicates }},
+                incorrectValues:{{ incorrectValues }},
+                novaluemiss: {{ novaluemiss }},
+                dupRate:{{ dupRate }},
+                uniqueValues:{{ uniqueValues }},
+                nb_outlier:{{nb_outlier}},
+                completeValues:{{ completeValues }},
+                completeRate:{{completeRate}},
+                incompleteRate: {{ incompleteRate }},
+                uniqunessRate:{{ uniqunessRate }},
+                consistenRate:{{ consistenRate }},
+                inconsistentValues:{{ inconsistentValues }},
+                inconsistenRate:{{ inconsistenRate }},
+                consistenValues:{{ consistenValues }},
+                redundancy:{{ redundancy }},
+                completeInfo:{{ completeInfo }},
+                conformRate:{{ conformRate }},
+                inconformRate:{{ inconformRate }},
+                validValues:{{ validValues }},
+                same_data_consistency: {{ same_data_consistency }}
+            };
+
+
+        }
+
+    });
+
+    (function activateReportOverviewModule($) {
+        'use strict';
+
+        var $el = $('.report-overview-module');
+
+        return new ReportOverviewModule({
+            element: $el,
+            data: {
+                //substituer ici
+                date: '2014-12-01',
+                sentTotal: {{ sentTotal }},
+                incompleteValues: {{ incompleteValues }},
+                duplicates: {{ duplicates }},
+                uniqueValues:{{ uniqueValues }},
+                incorrectValues:{{ incorrectValues }},
+                novaluemiss: {{ novaluemiss }},
+                nb_outlier:{{nb_outlier}},
+                dupRate:{{ dupRate }},
+                completeValues:{{ completeValues }},
+                consistenValues:{{ consistenValues }},
+                completeRate:{{completeRate}},
+                incompleteRate: {{incompleteRate}},
+                uniqunessRate:{{ uniqunessRate }},
+                redundancy:{{ redundancy }},
+                inconsistentValues:{{ inconsistentValues }},
+                consistenRate:{{ consistenRate }},
+                inconsistenRate:{{ inconsistenRate }},
+                completeInfo:{{ completeInfo }},
+                conformRate:{{ conformRate }},
+                inconformRate:{{ inconformRate }},
+                validValues:{{ validValues }},
+                same_data_consistency: {{ same_data_consistency }}
+            }
+        });
+
+    })(jQuery);
+
+
+</script>
+
+<button class="button"><a href="{% url 'accueil' %}">Accueil</a></button>
+
+</body>
+
+</html>
